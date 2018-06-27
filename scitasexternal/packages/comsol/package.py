@@ -37,6 +37,7 @@ class Comsol(Package):
     only_binary = True
 
     version('5.2a')
+    version('5.3')
 
     def install(self, spec, prefix):
         pass
