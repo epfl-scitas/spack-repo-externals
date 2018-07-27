@@ -36,7 +36,7 @@ class Gaussian(Package):
     homepage = "http://www.gaussian.com"
 
     version(
-        'g09-D.01',
+        'g16-A.03',
         '8730898096867217fef086386f643b4c',
         url="file:///home/ddossant/software/gaussian/g09-D.01.tar.gz"
     )
@@ -47,19 +47,28 @@ class Gaussian(Package):
     def setup_environment(self, spack_env, run_env):
 
         prefix = self.prefix
-        g09_dir = join_path(prefix, 'g09')
+        
+        vector_instructions = 'avx'
+        if 'target=x86_E5v4_Mellanox' in self.spec or 'target=x86_S6g1_Mellanox' in self.spec:
+            vector_instructions = 'avx2'
 
-        run_env.set('g09root', self.prefix)
+        g16_root = join_path(prefix, vector_instructions)
+        g16_dir = join_path(g16_root, 'g16')
+
+        run_env.set('g16root', g16_root)
 
         exec_dirs = [
-            g09_dir,
-            join_path(g09_dir, 'bsd'),
-            join_path(g09_dir, 'local')
+            g16_dir,
+            join_path(g16_dir, 'bsd'),
+            join_path(g16_dir, 'local'),
+            join_path(prefix, 'gv', 'bin')
         ]
 
         run_env.set('GAUSS_EXEDIR', ':'.join(exec_dirs))
-        run_env.set('GAUSS_LEXEDIR', join_path(g09_dir, 'linda-exe'))
-        run_env.set('GAUSS_ARCHDIR', join_path(g09_dir, 'arch'))
-        run_env.set('GAUSS_BSDDIR', join_path(g09_dir, 'bsd'))
+
+        run_env.set('GAUSS_LEXEDIR', join_path(g16_dir, 'linda-exe'))
+        run_env.set('GAUSS_ARCHDIR', join_path(g16_dir, 'arch'))
+        run_env.set('GAUSS_BSDDIR', join_path(g16_dir, 'bsd'))
         run_env.prepend_path('PATH', ':'.join(exec_dirs))
         run_env.prepend_path('LD_LIBRARY_PATH', ':'.join(exec_dirs))
+        run_env.prepend_path('LD_LIBRARY_PATH', join_path(prefix, 'gv', 'lib'))
