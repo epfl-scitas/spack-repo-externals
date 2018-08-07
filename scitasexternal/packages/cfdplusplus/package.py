@@ -34,30 +34,41 @@ class Cfdplusplus(Package):
     licensed = True
     only_binary = True
 
+    version('17.1')
     version('16.1')
 
     def install(self, spec, prefix):
         pass
 
     def setup_environment(self, spack_env, run_env):
-        run_env.set('CFDPLUSPLUS_ROOT', '/ssoft/spack/external/CFD++/2016.05')  # noqa: E501
-        run_env.set('CFDPLUSPLUS_INCLUDE', '/ssoft/spack/external/CFD++/2016.05/include')  # noqa: E501
-        run_env.set('CFDPLUSPLUS_LIBRARY', '/ssoft/spack/external/CFD++/2016.05/lib')  # noqa: E501
-        run_env.set('CFDPLUSPLUS_PATH', '/ssoft/spack/external/CFD++/2016.05/mlib/mcfd.16.1/exec')  # noqa: E501
-        run_env.prepend_path('LD_LIBRARY_PATH', '/ssoft/spack/external/CFD++/2016.05/lib')  # noqa: E501
-        run_env.prepend_path('LD_LIBRARY_PATH', '/ssoft/spack/external/CFD++/2016.05/glib')  # noqa: E501
-        run_env.prepend_path('PATH', '/ssoft/spack/external/CFD++/2016.05/mlib/mcfd.16.1/exec')  # noqa: E501
-        run_env.set('METACOMP_LICENSE_FILE', '/ssoft/spack/external/CFD++/2016.05/Lics/Metacomp.lic')  # noqa: E501
-        run_env.set('METACOMP_HOME', '/ssoft/spack/external/CFD++/2016.05')  # noqa: E501
-        run_env.set('MCFD_HOME', '/ssoft/spack/external/CFD++/2016.05/mlib/mcfd.16.1')  # noqa: E501
-        run_env.set('MCFD_VERSION', '16.1')
+        if self.spec.satisfies('@16.1'):
+            prefix_version = '2016.05'
+            version = '16.1'
+        elif self.spec.satisfies('@17.1'):
+            prefix_version = '17.1'
+            version = '17.1'
+
+        prefix = '/ssoft/spack/external/CFD++/{0}'.format(prefix_version)
+        mcfd_prefix = '{0}/mlib/mcfd.{1}'.format(prefix, version)
+
+        run_env.set('CFDPLUSPLUS_ROOT', prefix)
+        run_env.set('CFDPLUSPLUS_INCLUDE', prefix + '/include')
+        run_env.set('CFDPLUSPLUS_LIBRARY', prefix + '/lib')
+        run_env.set('CFDPLUSPLUS_PATH', mcfd_prefix + '/exec')
+        run_env.prepend_path('LD_LIBRARY_PATH', prefix + '/lib')
+        run_env.prepend_path('LD_LIBRARY_PATH', prefix + '/glib')
+        run_env.set('METACOMP_LICENSE_FILE', prefix + '/Lics/Metacomp.lic')
+        run_env.set('METACOMP_HOME', prefix + '')
+        run_env.set('MCFD_HOME', mcfd_prefix)
+        run_env.prepend_path('PATH', mcfd_prefix + '/exec')
+        run_env.set('MCFD_TCLTK', mcfd_prefix + '/exec/gui_src')
+        run_env.set('MCFD_HTML', mcfd_prefix + '/html')
+        run_env.set('MCFD_VERSION', version)
         run_env.set('MCFD_PAR_LIC_MODE', '2')
         run_env.set('MCFD_MAXMEM', '512G')
         run_env.set('MCFD_PROCMEM', '32G')
-        run_env.set('MCFD_TCLTK', '/ssoft/spack/external/CFD++/2016.05/mlib/mcfd.16.1/exec/gui_src')  # noqa: E501
-        run_env.set('MCFD_HTML', '/ssoft/spack/external/CFD++/2016.05/mlib/mcfd.16.1/html')  # noqa: E501
         run_env.set('MCFD_GUIOPT1', 'MCFD_GUI_TNEQC')
         run_env.set('MCFD_TOGL', 'yes')
-        run_env.set('TCL_LIBRARY', '/ssoft/spack/external/CFD++/2016.05/mlib/tcltk8/lib/tcl8.0')  # noqa: E501
-        run_env.set('TK_LIBRARY', '/ssoft/spack/external/CFD++/2016.05/mlib/tcltk8/lib/tk8.0')  # noqa: E501
-        run_env.set('MPATH', '/ssoft/spack/external/CFD++/2016.05/mbin')  # noqa: E501
+        run_env.set('TCL_LIBRARY', prefix + '/mlib/tcltk8/lib/tcl8.0')
+        run_env.set('TK_LIBRARY', prefix + '/mlib/tcltk8/lib/tk8.0')
+        run_env.set('MPATH', prefix + '/mbin')
