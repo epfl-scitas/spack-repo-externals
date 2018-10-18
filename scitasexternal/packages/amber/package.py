@@ -23,7 +23,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##############################################################################
 
-import os.path
 import shutil
 
 from spack import *
@@ -35,7 +34,7 @@ class Amber(Package):
     """
 
     homepage = 'http://ambermd.org'
-    url = 'file:///home/ddossant/amber-16.tgz'
+    url = 'file:///fake/path/to/amber-16.tgz'
 
     version('18', 'ae5438d3f1e2d3379d5664c34193ae48')
     version('16', '652e24512146e966a0a50335572ebd66')
