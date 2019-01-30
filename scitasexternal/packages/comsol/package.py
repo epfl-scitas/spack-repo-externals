@@ -36,8 +36,9 @@ class Comsol(Package):
     licensed = True
     only_binary = True
 
-    version('5.2a')
+    version('5.4')
     version('5.3')
+    version('5.2a')
 
     def install(self, spec, prefix):
         pass
