@@ -62,6 +62,7 @@ class Gaussian(Package):
             join_path(g16_dir, 'bsd'),
             join_path(g16_dir, 'local'),
             join_path(prefix, 'gv', 'bin')
+            join_path(prefix, 'gv')
         ]
 
         run_env.set('GAUSS_EXEDIR', ':'.join(exec_dirs))
