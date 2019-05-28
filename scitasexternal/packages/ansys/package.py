@@ -69,12 +69,12 @@ class Ansys(Package):
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'autodyn/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'fluent/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'polyflow/bin'))
-        if 'version=17.1' in self.spec: run_env.prepend_path('PATH', join_path(ansys_prefix, 'tgrid/bin'))
+        if '17.1' in ansys_prefix: run_env.prepend_path('PATH', join_path(ansys_prefix, 'tgrid/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'Framework/bin/Linux64'))  # noqa: E501
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'icemcfd/linux64_amd/bin'))  # noqa: E501
         
         run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'Framework/bin/Linux64'))  # noqa: E501
-        if 'version=17.1' in self.spec: run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'polyflow/polyflow17.1.0/lnamd64/libs'))  # noqa: E501
-        else: run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'polyflow/polyflow19.2.0/lnamd64/libs'))  # noqa: E501
+        if '19.2' in ansys_prefix: run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'polyflow/polyflow19.2.0/lnamd64/libs'))  # noqa: E501
+        if '17.1' in ansys_prefix: run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'polyflow/polyflow17.1.0/lnamd64/libs'))  # noqa: E501
         run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'Framework/bin/Linux64/Mesa')) # noqa: E501
 
