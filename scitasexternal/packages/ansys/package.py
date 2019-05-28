@@ -57,10 +57,10 @@ class Ansys(Package):
         pass
 
     def setup_environment(self, spack_env, run_env):
-        vers = self.spec.version
+        version = self.spec.version
         ansys_prefix = '/ssoft/spack/external/ansys/{0}/v{1}'.format(
-            vers.up_to(2).dotted,
-            vers.up_to(2).joined)
+            version.up_to(2).dotted,
+            version.up_to(2).joined)
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'ansys/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'CFD-Post/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'CFX/bin'))
@@ -69,12 +69,11 @@ class Ansys(Package):
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'autodyn/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'fluent/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'polyflow/bin'))
-        if '17.1' in ansys_prefix: run_env.prepend_path('PATH', join_path(ansys_prefix, 'tgrid/bin'))
+        if version == Version('17.1'): run_env.prepend_path('PATH', join_path(ansys_prefix, 'tgrid/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'Framework/bin/Linux64'))  # noqa: E501
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'icemcfd/linux64_amd/bin'))  # noqa: E501
         
         run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'Framework/bin/Linux64'))  # noqa: E501
-        if '19.2' in ansys_prefix: run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'polyflow/polyflow19.2.0/lnamd64/libs'))  # noqa: E501
-        if '17.1' in ansys_prefix: run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'polyflow/polyflow17.1.0/lnamd64/libs'))  # noqa: E501
+        run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'polyflow/polyflow{0}.0/lnamd64/libs'.format(version.up_to(2).dotted))) # noqa: E501
         run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'Framework/bin/Linux64/Mesa')) # noqa: E501
 
