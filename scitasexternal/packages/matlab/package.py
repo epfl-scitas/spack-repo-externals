@@ -54,7 +54,7 @@ class Matlab(Package):
 
     variant(
         'key',
-        default='',
+        default='default-key',
         values=lambda x: True,  # Anything goes as a key
         description='The file installation key to use'
     )
