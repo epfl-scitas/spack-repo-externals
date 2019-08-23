@@ -47,7 +47,7 @@ class Gaussian(Package):
     def setup_environment(self, spack_env, run_env):
 
         prefix = self.prefix
-        
+
         vector_instructions = 'avx'
         if 'target=x86_E5v4_Mellanox' in self.spec or 'target=x86_S6g1_Mellanox' in self.spec:
             vector_instructions = 'avx2'
@@ -61,8 +61,8 @@ class Gaussian(Package):
             g16_dir,
             join_path(g16_dir, 'bsd'),
             join_path(g16_dir, 'local'),
-            join_path(prefix, 'gv', 'bin')
-            join_path(prefix, 'gv')
+            join_path(prefix, 'gv', 'bin'),
+            join_path(prefix, 'gv'),
         ]
 
         run_env.set('GAUSS_EXEDIR', ':'.join(exec_dirs))
