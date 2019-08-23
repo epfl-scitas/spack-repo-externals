@@ -35,7 +35,8 @@ class Molpro(Package):
 
     version('2015.1',
             '13da76da1a150fb513a8b0a5da5ddce8',
-            url='file://%s/molpro-2016-12-05.tar.gz' % os.getcwd())
+            url='file://%s/.molpro/downloads/molpro-2016-12-05.tar.gz' %
+            os.path.expanduser("~"))
 
     variant('mpi', default=True, description='Build with MPI support')
 
