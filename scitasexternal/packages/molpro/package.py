@@ -16,8 +16,7 @@ class Molpro(Package):
 
     version('2015.1',
             '13da76da1a150fb513a8b0a5da5ddce8',
-            url='file://%s/molpro-2016-12-05.tar.gz' %
-            os.getcwd())
+            url='file://%s/molpro-2016-12-05.tar.gz' % os.getcwd())
 
     variant('mpi', default=True, description='Build with MPI support')
 
@@ -57,8 +56,8 @@ class Molpro(Package):
         # We need to change the LAUNCHER in CONFIG to something not MPI
         # dependent to avoid problems with SLURM.
         filter_file(r'^LAUNCHER=.*', 'LAUNCHER=%x', 'CONFIG')
-
         make()
+
         # Before the installation we change the launcher to srun (%x is the
         # Molpro executable itself) to conform to our cluster.
         filter_file(r'^LAUNCHER=.*', 'LAUNCHER=srun %x', 'CONFIG')
