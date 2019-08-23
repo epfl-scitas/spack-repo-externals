@@ -1,27 +1,8 @@
-##############################################################################
-# Copyright (c) 2013-2016, Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
+# Copyright 2013-2019 Lawrence Livermore National Security, LLC and other
+# Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
-# This file is part of Spack.
-# Created by Todd Gamblin, tgamblin@llnl.gov, All rights reserved.
-# LLNL-CODE-647188
-#
-# For details, see https://github.com/llnl/spack
-# Please also see the LICENSE file for our notice and the LGPL.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License (as
-# published by the Free Software Foundation) version 2.1, February 1999.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the IMPLIED WARRANTY OF
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the terms and
-# conditions of the GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-##############################################################################
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
 from spack import *
 import os
 import subprocess
@@ -35,8 +16,8 @@ class Molpro(Package):
 
     version('2015.1',
             '13da76da1a150fb513a8b0a5da5ddce8',
-            url='file://%s/.molpro/downloads/molpro-2016-12-05.tar.gz' %
-            os.path.expanduser("~"))
+            url='file://%s/molpro-2016-12-05.tar.gz' %
+            os.getcwd())
 
     variant('mpi', default=True, description='Build with MPI support')
 
@@ -57,9 +38,6 @@ class Molpro(Package):
             options.append("--with-blas-path=%s/lib/intel64" %
                            spec['blas'].prefix)
         elif '^openblas' in spec:
-            # options.append("--with-blas='-L%s %s'" %
-            #                (spec['blas'].prefix.lib,
-            #                 spec['blas'].libs))
             options.append("--with-blas=%s" % spec['blas'].libs)
         # Leaving open the possibility of using -lblas
         else:
@@ -75,20 +53,15 @@ class Molpro(Package):
                 options.append('--enable-mpp=%s' % spec['mpi'].prefix.include)
         configure(*options)
 
-        # DJ
         # Molpro wants to use mpirun_rsh during the installation.
         # We need to change the LAUNCHER in CONFIG to something not MPI
         # dependent to avoid problems with SLURM.
-        subprocess.call(['sed', '-i',
-                        's#^LAUNCHER=.*#LAUNCHER="%x"#',
-                         'CONFIG'])
+        filter_file(r'^LAUNCHER=.*', 'LAUNCHER=%x', 'CONFIG')
 
         make()
         # Before the installation we change the launcher to srun (%x is the
         # Molpro executable itself) to conform to our cluster.
-        subprocess.call(['sed', '-i',
-                         's#^LAUNCHER=.*#LAUNCHER=srun %x#',
-                         'CONFIG'])
+        filter_file(r'^LAUNCHER=.*', 'LAUNCHER=srun %x', 'CONFIG')
 
         make('install')
 
