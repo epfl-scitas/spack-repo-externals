@@ -19,7 +19,6 @@
 #
 # See the Spack documentation for more information on packaging.
 # ----------------------------------------------------------------------------
-
 from spack import *
 
 
@@ -34,4 +33,4 @@ class Gurobi(Package):
     version('8.1.1', 'c030414603d88ad122246fe0e42a314fab428222d98e26768480f1f870b53484')
  
     def setup_environment(self, spack_env, run_env):
-	run_env.set('GRB_LICENSE_FILE', join_path(self.prefix,'gurobi.lic'))
+        run_env.set('GRB_LICENSE_FILE', join_path(self.prefix,'gurobi.lic'))
