@@ -24,6 +24,7 @@
 ##############################################################################
 
 import shutil
+import os
 
 from spack import *
 
@@ -34,8 +35,9 @@ class Amber(Package):
     """
 
     homepage = 'http://ambermd.org'
-    url = 'file:///fake/path/to/amber-16.tgz'
+    url = 'file:///%s/amber-18.tar.bz2' % os.getcwd()
 
+    version('18.19', '29d6fa953ef4a6e0349f4a9a36d5767b871f6784aaf9c6746fc535202e67e200d0b354bdbd8cbeb2e0b087d48a13b00dc912a7124cfdc1fa540bf3a30568cb81')
     version('18', 'ae5438d3f1e2d3379d5664c34193ae48')
     version('16', '652e24512146e966a0a50335572ebd66')
 
@@ -45,14 +47,7 @@ class Amber(Package):
     variant('openmp', default=False, description='Enables OpenMP support')
     variant('cuda', default=False, description='Enables CUDA support')
     variant('X', default=False, description='Enables X11 support')
-    # As of September 2018 AmberTools packmol_memgen is the only
-    # boost-dependent part. However, AmberTools fails to compile if boost
-    # support is included, due to a bug. By putting packmol as a variant,
-    # AmberTools can be compiled in spite of this specific issue.
-    variant('packmol', default=False,
-            description='Compiles the optional packmol_memgen')
 
-    depends_on('boost', when='+packmol')
     depends_on('cuda', when='+cuda')
     depends_on('lapack')
     depends_on('mpi', when='+mpi')
@@ -66,6 +61,7 @@ class Amber(Package):
     depends_on('python')
     depends_on('py-numpy')
     depends_on('py-scipy')
+    depends_on('py-setuptools', type='build')
     depends_on('py-matplotlib', when='+X')
 
     # There is probably a bug in the Makefile and in some cases the parallel
