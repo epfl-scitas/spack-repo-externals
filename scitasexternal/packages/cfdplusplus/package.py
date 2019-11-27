@@ -34,6 +34,7 @@ class Cfdplusplus(Package):
     licensed = True
     only_binary = True
 
+    version('19.1')
     version('17.1')
     version('16.1')
 
@@ -47,6 +48,9 @@ class Cfdplusplus(Package):
         elif self.spec.satisfies('@17.1'):
             prefix_version = '17.1'
             version = '17.1'
+        elif self.spec.satisfies('@19.1'):
+            prefix_version = '19.1'
+            version = '19.1'
 
         prefix = '/ssoft/spack/external/CFD++/{0}'.format(prefix_version)
         mcfd_prefix = '{0}/mlib/mcfd.{1}'.format(prefix, version)
