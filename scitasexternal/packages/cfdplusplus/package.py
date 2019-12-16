@@ -42,12 +42,12 @@ class Cfdplusplus(Package):
         pass
 
     def setup_environment(self, spack_env, run_env):
-        version =  self.spec.version.up_to(2).dotted
+        version = str(self.spec.version.up_to(2).dotted)
         prefix_version = version
         if self.spec.satisfies('@16.1'):
             prefix_version = '2016.05'
         
-        prefix = '/ssoft/spack/external/CFD++/{0}'.format(prefix_version)
+        prefix = self.prefix
         mcfd_prefix = '{0}/mlib/mcfd.{1}'.format(prefix, version)
 
         run_env.set('CFDPLUSPLUS_ROOT', prefix)
