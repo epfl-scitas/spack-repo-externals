@@ -8,6 +8,7 @@ import shutil
 
 from spack import *
 
+
 class Vasp(Package):
     """VASP is a plane wave electronic structure code."""
 
@@ -37,17 +38,23 @@ class Vasp(Package):
             arch_file = join_path('arch', 'makefile.include.linux_intel')
             # Our spack recipe for intel-mkl breaks $MKLROOT. Otherwise we
             # woiuldn't need these two lines
-            filter_file(r'\$\(MKLROOT\)', '%s' % os.environ["MKLROOT"], arch_file)
-            filter_file('mkl/compilers_and_libraries/linux/mkl', 'mkl', arch_file)
+            filter_file(r'\$\(MKLROOT\)', '%s' % os.environ["MKLROOT"],
+                        arch_file)
+            filter_file('mkl/compilers_and_libraries/linux/mkl', 'mkl',
+                        arch_file)
 
         if '%gcc' in spec:
             arch_file = join_path('arch', 'makefile.include.linux_gnu')
             filter_file(r'mpif90', '%s' % spec['mpi'].mpifc, arch_file)
-            filter_file(r'^BLAS\s*=.*', 'BLAS = -L%s -lopenblas' % spec['blas'].prefix.lib, arch_file)
+            filter_file(r'^BLAS\s*=.*', 'BLAS = -L%s -lopenblas'
+                        % spec['blas'].prefix.lib, arch_file)
             filter_file(r'^LAPACK\s*=.*', 'LAPACK =', arch_file)
-            filter_file(r'^SCALAPACK\s*=.*', 'SCALAPACK = -L%s -lscalapack' % spec['scalapack'].prefix.lib, arch_file)
-            filter_file(r'^FFTW\s*.=.*', 'FFTW = %s' % spec['fftw'].prefix, arch_file)
-            filter_file(r'^MPI_INC\s*.=.*', 'MPI_INC = %s' % spec['mpi'].prefix.include, arch_file)
+            filter_file(r'^SCALAPACK\s*=.*', 'SCALAPACK = -L%s -lscalapack'
+                        % spec['scalapack'].prefix.lib, arch_file)
+            filter_file(r'^FFTW\s*.=.*', 'FFTW = %s'
+                        % spec['fftw'].prefix, arch_file)
+            filter_file(r'^MPI_INC\s*.=.*', 'MPI_INC = %s'
+                        % spec['mpi'].prefix.include, arch_file)
 
         shutil.copy(arch_file, 'makefile.include')
         make('all')
