@@ -37,10 +37,8 @@ class Vasp(Package):
         if '%intel' in spec:
             arch_file = join_path('arch', 'makefile.include.linux_intel')
             # Our spack recipe for intel-mkl breaks $MKLROOT. Otherwise we
-            # woiuldn't need these two lines
-            filter_file(r'\$\(MKLROOT\)', '%s' % os.environ["MKLROOT"],
-                        arch_file)
-            filter_file('mkl/compilers_and_libraries/linux/mkl', 'mkl',
+            # woiuldn't need these lines
+            filter_file(r'\$\(MKLROOT\)', '%s' % spec['intel-mkl'].prefix,
                         arch_file)
 
         if '%gcc' in spec:
