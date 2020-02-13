@@ -44,11 +44,12 @@ class Vasp(Package):
         if '%gcc' in spec:
             arch_file = join_path('arch', 'makefile.include.linux_gnu')
             filter_file(r'mpif90', '%s' % spec['mpi'].mpifc, arch_file)
-            filter_file(r'^BLAS\s*=.*', 'BLAS = -L%s -lopenblas'
-                        % spec['blas'].prefix.lib, arch_file)
-            filter_file(r'^LAPACK\s*=.*', 'LAPACK =', arch_file)
-            filter_file(r'^SCALAPACK\s*=.*', 'SCALAPACK = -L%s -lscalapack'
-                        % spec['scalapack'].prefix.lib, arch_file)
+            filter_file(r'^BLAS\s*=.*', 'BLAS = %s'
+                        % spec['blas'].libs.ld_flags, arch_file)
+            filter_file(r'^LAPACK\s*=.*', 'LAPACK = %s'
+                        % spec['lapack'].libs.ld_flags, arch_file)
+            filter_file(r'^SCALAPACK\s*=.*', 'SCALAPACK = %s'
+                        % spec['scalapack'].libs.ld_flags, arch_file)
             filter_file(r'^FFTW\s*.=.*', 'FFTW = %s'
                         % spec['fftw'].prefix, arch_file)
             filter_file(r'^MPI_INC\s*.=.*', 'MPI_INC = %s'
