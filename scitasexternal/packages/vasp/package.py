@@ -40,8 +40,7 @@ class Vasp(Package):
             # wouldn't need these lines
             filter_file(r'\$\(MKLROOT\)', '%s' % spec['intel-mkl'].prefix,
                         arch_file)
-
-        if '%gcc' in spec:
+        elif '%gcc' in spec:
             arch_file = join_path('arch', 'makefile.include.linux_gnu')
             filter_file(r'mpif90', '%s' % spec['mpi'].mpifc, arch_file)
             filter_file(r'^BLAS\s*=.*', 'BLAS = %s'
@@ -54,6 +53,9 @@ class Vasp(Package):
                         % spec['fftw'].prefix, arch_file)
             filter_file(r'^MPI_INC\s*.=.*', 'MPI_INC = %s'
                         % spec['mpi'].prefix.include, arch_file)
+        else:
+            raise InstallError('This package was only tested with the'
+                               '\'gcc\' and \'intel\' compilers!')
 
         shutil.copy(arch_file, 'makefile.include')
         make('all')
