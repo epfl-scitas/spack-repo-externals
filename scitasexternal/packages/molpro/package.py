@@ -20,7 +20,7 @@ class Molpro(Package):
 
     depends_on('blas')
     depends_on('lapack')
-    depends_on('python@:3')
+    depends_on('python@:3', when='@2019:')
 
     depends_on('mpi', when='+mpi')
     depends_on('eigen', when='@2019:')
