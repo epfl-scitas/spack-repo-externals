@@ -5,24 +5,25 @@
 
 from spack import *
 import os
-import subprocess
 
 
 class Molpro(Package):
     """Molpro is an ab initio program for electronic structure calculations."""
 
     homepage = "http://www.molpro.net"
-    url      = "fake_url.tar.gz"
+    url      = 'file://%s/molpro-2019.2.tar.gz' % os.getcwd()
 
-    version('2015.1',
-            '13da76da1a150fb513a8b0a5da5ddce8',
-            url='file://%s/molpro-2016-12-05.tar.gz' % os.getcwd())
+    version('2019.2', sha256='168fb70b219166af5e463be4d1a459d6f3f9991cde5774b0a3c84d2a13f9cfd7')
+    version('2015.1', sha256='a51df73acd54911fcc2d468ffa66676fb83117bb4e463eefe22dcaba4645c477')
 
     variant('mpi', default=True, description='Build with MPI support')
 
     depends_on('blas')
     depends_on('lapack')
+    depends_on('python@:3')
+
     depends_on('mpi', when='+mpi')
+    depends_on('eigen', when='@2019:')
 
     # For a successful installation of Molpro either the environment variable
     # $MOLPRO_KEY or the file $HOME/.molpro/token has to exist. The content
@@ -44,17 +45,21 @@ class Molpro(Package):
         if '+mpi' in spec:
             options.append('FC=%s' % spec['mpi'].mpifc)
             options.append('CXX=%s' % spec['mpi'].mpicxx)
-            if '%intel' in spec:
-                options.append('--enable-mpp=%s/intel64/include' %
-                               spec['mpi'].prefix)
+            if self.version < Version('2019'):
+                if '%intel' in spec:
+                    options.append('--enable-mpp=%s/intel64/include' %
+                                   spec['mpi'].prefix)
+                elif '%gcc':
+                    options.append('--enable-mpp=%s' %
+                                   spec['mpi'].prefix.include)
+                    options.append('F90FLAGS=-ffree-line-length-none')
             else:
-                options.append('F90FLAGS=-ffree-line-length-none')
-                options.append('--enable-mpp=%s' % spec['mpi'].prefix.include)
+                options.append('--without-ga')
         configure(*options)
 
-        # Molpro wants to use mpirun_rsh during the installation.
+        # Molpro wants to use a variation of mpirun during the installation.
         # We need to change the LAUNCHER in CONFIG to something not MPI
-        # dependent to avoid problems with SLURM.
+        # dependent to avoid problems with Slurm.
         filter_file(r'^LAUNCHER=.*', 'LAUNCHER=%x', 'CONFIG')
         make()
 
@@ -65,5 +70,11 @@ class Molpro(Package):
         make('install')
 
     def setup_environment(self, spack_env, run_env):
+        if self.version < Version('2019'):
+            dir_base_name='molprop'
+        else:
+            dir_base_name='molpro'
+        directory='{0}_{1}_linux_x86_64_i8'.format(dir_base_name,
+                                                   self.version.up_to(2).underscored)
         run_env.prepend_path('PATH', join_path(self.prefix,
-                             'molprop_2015_1_linux_x86_64_i8', 'bin'))
+                             directory, 'bin'))
