@@ -1,0 +1,33 @@
+--- a/build/Xmakes/Linux-intel.inc	2020-03-20 17:04:22.901169000 +0100
++++ b/build/Xmakes/Linux-intel.inc	2020-03-18 08:46:53.510831000 +0100
+@@ -0,0 +1,30 @@
++# For Linux on clutwin intel64, using Intel Fortran Compiler
++
++MPIBIN  = 
++F90     = mpiifort
++LD      = $(F90)
++PLD     = $(F90)
++
++F90FLAGS = -O3 -align -cxxlib -xHost -mkl=sequential
++F90FIXED = -FI
++F90FREE  = -FR
++SAVEMOD = -module $(MODDIR)
++INCMOD  = -I$(MODDIR)
++LDFLAGS = $(F90FLAGS)
++LDLIBS  = -Lxcfun xcfun/libxcfun.a -lm
++#LDLIBS  =
++
++MXMB    = $(OBJDIR)/libmxm.o
++
++MACHINE_C=mach_linux
++
++CC=icc
++CFLAGS=-g -Wall -O2 -DNDEBUG
++CXX=icpc
++CXXFLAGS=$(CFLAGS) -fno-rtti -fno-exceptions
++
++# MPI harness
++HARNESS = $(MPI)
++
++MKL=$(MKLROOT)/lib/intel64
++MPPLIB=-lmkl_scalapack_lp64 -lmkl_blacs_intelmpi_lp64 -lpthread
