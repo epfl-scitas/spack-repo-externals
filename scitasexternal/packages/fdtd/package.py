@@ -28,11 +28,12 @@ from spack import *
 class Fdtd(Package):
     """3D/2D Maxwell's solver for nanophotonic devices."""
 
-    homepage = "https://www.lumerical.com/tcad-products/fdtd/"
+    homepage = "https://www.lumerical.com/products/fdtd/"
     url      = "fakeurl.tar.gz"
     licensed = True
     only_binary = True
 
+    version('8.24.2387')
     version('8.20.1703')
     version('8.19.1416-1')
     version('8.18.1365-1')
