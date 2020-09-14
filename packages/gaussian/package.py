@@ -34,12 +34,10 @@ class Gaussian(Package):
     """
 
     homepage = "http://www.gaussian.com"
+    url = 'fakeurl.tar.gz'
 
-    version(
-        'g16-A.03',
-        '8730898096867217fef086386f643b4c',
-        url="file:///home/ddossant/software/gaussian/g09-D.01.tar.gz"
-    )
+    version('g16-C.01')
+    version('g16-A.03')
 
     def install(self, spec, prefix):
         distutils.dir_util.copy_tree(".", prefix + '/g09')

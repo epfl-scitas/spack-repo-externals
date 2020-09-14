@@ -23,8 +23,11 @@ class Molpro(Package):
     depends_on('python@:3', when='@2019:')
 
     depends_on('mpi', when='+mpi')
+    depends_on('mpi', when='@2019:')
     depends_on('eigen', when='@2019:')
+    depends_on('libxml2')
 
+    conflicts('python@:3')
     # For a successful installation of Molpro either the environment variable
     # $MOLPRO_KEY or the file $HOME/.molpro/token has to exist. The content
     # of those is not checked during the installation, so anything will work.
@@ -34,24 +37,16 @@ class Molpro(Package):
 
     def install(self, spec, prefix):
         options = ['--prefix=%s' % prefix]
-        if '^intel-mkl' in spec:
-            options.append("--with-blas-path=%s/lib/intel64" %
-                           spec['blas'].prefix)
-        elif '^openblas' in spec:
-            options.append("--with-blas=%s" % spec['blas'].libs)
-        # Leaving open the possibility of using -lblas
-        else:
-            options.append("--with-blas-path=%s" % spec['blas'].prefix.lib)
-        if '+mpi' in spec:
+
+        options.append("--with-blas=" % spec['blas'].libs)
+
+        if 'mpi' in spec:
             options.append('FC=%s' % spec['mpi'].mpifc)
             options.append('CXX=%s' % spec['mpi'].mpicxx)
             if self.version < Version('2019'):
-                if '%intel' in spec:
-                    options.append('--enable-mpp=%s/intel64/include' %
-                                   spec['mpi'].prefix)
-                elif '%gcc':
-                    options.append('--enable-mpp=%s' %
-                                   spec['mpi'].prefix.include)
+                options.append('--enable-mpp=%s' %
+                               spec['mpi'].prefix.include)
+                if '%gcc':
                     options.append('F90FLAGS=-ffree-line-length-none')
             else:
                 options.append('--without-ga')
