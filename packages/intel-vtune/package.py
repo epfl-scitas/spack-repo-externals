@@ -16,7 +16,7 @@ class IntelVtune(Package):
         version = self.spec.version
         run_env.prepend_path('PKG_CONFIG_PATH',
                              join_path(self.prefix, 'include/pkgconfig/lib64'))
-        run_env.set_path('PATH', join_path(self.prefix, 'bin64'))
+        run_env.prepend_path('PATH', join_path(self.prefix, 'bin64'))
         run_env.set_path('VTUNE_AMPLIFIER_{0}_DIR'.format(version.up_to(1)),
                          join_path(self.prefix, ''))
 
