@@ -17,7 +17,7 @@ class IntelAdvisor(Package):
         run_env.prepend_path('PKG_CONFIG_PATH',
                              join_path(self.prefix, 'include/pkgconfig/lib64'))
         run_env.prepend_path('PYTHONPATH', join_path(self.prefix, 'pythonapi'))
-        run_env.prepend_path_path('PATH', join_path(self.prefix, 'bin64'))
+        run_env.prepend_path('PATH', join_path(self.prefix, 'bin64'))
         run_env.set_path('ADVISOR_{0}_DIR'.format(version.up_to(1)),
                          join_path(self.prefix, ''))
 
