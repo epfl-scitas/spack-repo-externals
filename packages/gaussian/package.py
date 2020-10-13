@@ -46,9 +46,11 @@ class Gaussian(Package):
 
         prefix = self.prefix
 
-        vector_instructions = 'avx'
-        if 'target=x86_E5v4_Mellanox' in self.spec or 'target=x86_S6g1_Mellanox' in self.spec:
+        vector_instructions = ''
+        if 'avx2' in self.spec.target:
             vector_instructions = 'avx2'
+        elif 'avx' in self.spec.target:
+            vector_instructions = 'avx'
 
         g16_root = join_path(prefix, vector_instructions)
         g16_dir = join_path(g16_root, 'g16')
