@@ -50,6 +50,7 @@ class Ansys(Package):
     licensed = True
     only_binary = True
 
+    version('20.2')
     version('19.2')
     version('17.1')
 
