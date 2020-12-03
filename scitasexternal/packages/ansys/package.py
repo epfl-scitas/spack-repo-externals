@@ -59,17 +59,14 @@ class Ansys(Package):
 
     def setup_environment(self, spack_env, run_env):
         version_mapping = { '2020R2': '20.2' }
-        version = self.spec.version
+        version = self.spec.version       
 
-	if version in version_mapping:
-           prefix_version = version
-           version = Version(version_mapping[version])
-        else:
-           prefix_version = version.up_to(2).dotted
+        if str(version) in version_mapping:
+           version = Version(version_mapping[str(version)])
+        version_dotted = version.up_to(2).dotted
 
-        ansys_prefix = '/ssoft/spack/external/ansys/{0}/v{1}'.format(
-            prefix_version,
-            version.up_to(2).joined)
+        ansys_prefix = self.prefix
+
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'ansys/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'CFD-Post/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'CFX/bin'))
@@ -83,6 +80,6 @@ class Ansys(Package):
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'icemcfd/linux64_amd/bin'))  # noqa: E501
         
         run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'Framework/bin/Linux64'))  # noqa: E501
-        run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'polyflow/polyflow{0}.0/lnamd64/libs'.format(version.up_to(2).dotted))) # noqa: E501
+        run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'polyflow/polyflow{0}.0/lnamd64/libs'.format(version_dotted))) # noqa: E501
         run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'Framework/bin/Linux64/Mesa')) # noqa: E501
 
