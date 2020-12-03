@@ -59,11 +59,11 @@ class Ansys(Package):
 
     def setup_environment(self, spack_env, run_env):
         version_mapping = { '2020R2': '20.2' }
-	version = self.spec.version
+        version = self.spec.version
 
 	if version in version_mapping:
            prefix_version = version
-	   version = Version(version_mapping[version])
+           version = Version(version_mapping[version])
         else:
            prefix_version = version.up_to(2).dotted
 
