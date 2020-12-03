@@ -50,7 +50,7 @@ class Ansys(Package):
     licensed = True
     only_binary = True
 
-    version('20.2')
+    version('2020R2')
     version('19.2')
     version('17.1')
 
@@ -58,9 +58,17 @@ class Ansys(Package):
         pass
 
     def setup_environment(self, spack_env, run_env):
+        version_mapping = { '2020R2': '20.2' }
         version = self.spec.version
+
+	if version in version_mapping:
+           prefix_version = version
+           version = Version(version_mapping[version])
+        else:
+           prefix_version = version.up_to(2).dotted
+
         ansys_prefix = '/ssoft/spack/external/ansys/{0}/v{1}'.format(
-            version.up_to(2).dotted,
+            prefix_version,
             version.up_to(2).joined)
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'ansys/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'CFD-Post/bin'))
