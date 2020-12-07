@@ -22,26 +22,12 @@
 # License along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##############################################################################
-#
-# This is a template package file for Spack.  We've put "FIXME"
-# next to all the things you'll want to change. Once you've handled
-# them, you can save this file and test your package like this:
-#
-#     spack install ansys
-#
-# You can edit this file again by typing:
-#
-#     spack edit ansys
-#
-# See the Spack documentation for more information on packaging.
-# If you submit this package back to Spack as a pull request,
-# please first remove this boilerplate and all FIXME comments.
-#
 from spack import *
 
 
 class Ansys(Package):
-    """Ansys Fluent - To use this software you need to be a member of the ansys-users group
+    """
+    Ansys Fluent - To use this software you need to be a member of the ansys-users group
     Please see http://ansys.epfl.ch for further information
     """
 
@@ -75,11 +61,28 @@ class Ansys(Package):
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'autodyn/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'fluent/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'polyflow/bin'))
-        if version == Version('17.1'): run_env.prepend_path('PATH', join_path(ansys_prefix, 'tgrid/bin'))
-        run_env.prepend_path('PATH', join_path(ansys_prefix, 'Framework/bin/Linux64'))  # noqa: E501
-        run_env.prepend_path('PATH', join_path(ansys_prefix, 'icemcfd/linux64_amd/bin'))  # noqa: E501
-        
-        run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'Framework/bin/Linux64'))  # noqa: E501
-        run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'polyflow/polyflow{0}.0/lnamd64/libs'.format(version_dotted))) # noqa: E501
-        run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'Framework/bin/Linux64/Mesa')) # noqa: E501
+
+        if version == Version('17.1'):
+            run_env.prepend_path('PATH', join_path(ansys_prefix, 'tgrid/bin'))
+
+        run_env.prepend_path(
+            'PATH',
+            join_path(ansys_prefix, 'Framework/bin/Linux64'))
+        run_env.prepend_path(
+            'PATH',
+            join_path(ansys_prefix, 'icemcfd/linux64_amd/bin'))
+
+        if version < Version('20.2'):
+            run_env.prepend_path(
+                'LD_LIBRARY_PATH',
+                join_path(ansys_prefix, 'Framework/bin/Linux64'))
+            run_env.prepend_path(
+                'LD_LIBRARY_PATH',
+                join_path(
+                    ansys_prefix,
+                    'polyflow/polyflow{0}.0/lnamd64/libs'.format(version.up_to(2).dotted))) # noqa: E501
+            run_env.prepend_path(
+                'LD_LIBRARY_PATH',
+                join_path(ansys_prefix, 'Framework/bin/Linux64/Mesa'))
+
 
