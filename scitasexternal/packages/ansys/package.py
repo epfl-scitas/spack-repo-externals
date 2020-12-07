@@ -27,8 +27,8 @@ from spack import *
 
 class Ansys(Package):
     """
-    Ansys Fluent - To use this software you need to be a member of the ansys-users group
-    Please see http://ansys.epfl.ch for further information
+    Ansys Fluent - To use this software you need to be a member of the
+    ansys-users group Please see http://ansys.epfl.ch for further information
     """
 
     homepage = "http://www.ansys.com"
@@ -61,6 +61,10 @@ class Ansys(Package):
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'autodyn/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'fluent/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'polyflow/bin'))
+
+        run_env.prepend_path(
+            'PATH',
+            join_path(ansys_prefix, 'RSM/Config/tools/linux'))
 
         if version == Version('17.1'):
             run_env.prepend_path('PATH', join_path(ansys_prefix, 'tgrid/bin'))
