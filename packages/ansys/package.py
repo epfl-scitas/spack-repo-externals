@@ -41,8 +41,9 @@ from spack import *
 
 
 class Ansys(Package):
-    """Ansys Fluent - To use this software you need to be a member of the ansys-users group
-    Please see http://ansys.epfl.ch for further information
+    """
+    Ansys Fluent - To use this software you need to be a member of the
+    ansys-users group Please see http://ansys.epfl.ch for further information
     """
 
     homepage = "http://www.ansys.com"
@@ -50,6 +51,7 @@ class Ansys(Package):
     licensed = True
     only_binary = True
 
+    version('2020R2')
     version('19.2')
     version('17.1')
 
@@ -57,10 +59,15 @@ class Ansys(Package):
         pass
 
     def setup_environment(self, spack_env, run_env):
+        version_mapping = { '2020R2': '20.2' }
         version = self.spec.version
-        ansys_prefix = '/ssoft/spack/external/ansys/{0}/v{1}'.format(
-            version.up_to(2).dotted,
-            version.up_to(2).joined)
+
+        if str(version) in version_mapping:
+           version = Version(version_mapping[str(version)])
+        version_dotted = version.up_to(2).dotted
+
+        ansys_prefix = self.prefix
+
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'ansys/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'CFD-Post/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'CFX/bin'))
@@ -69,11 +76,30 @@ class Ansys(Package):
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'autodyn/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'fluent/bin'))
         run_env.prepend_path('PATH', join_path(ansys_prefix, 'polyflow/bin'))
-        if version == Version('17.1'): run_env.prepend_path('PATH', join_path(ansys_prefix, 'tgrid/bin'))
-        run_env.prepend_path('PATH', join_path(ansys_prefix, 'Framework/bin/Linux64'))  # noqa: E501
-        run_env.prepend_path('PATH', join_path(ansys_prefix, 'icemcfd/linux64_amd/bin'))  # noqa: E501
-        
-        run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'Framework/bin/Linux64'))  # noqa: E501
-        run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'polyflow/polyflow{0}.0/lnamd64/libs'.format(version.up_to(2).dotted))) # noqa: E501
-        run_env.prepend_path('LD_LIBRARY_PATH', join_path(ansys_prefix, 'Framework/bin/Linux64/Mesa')) # noqa: E501
 
+        run_env.prepend_path(
+            'PATH',
+            join_path(ansys_prefix, 'RSM/Config/tools/linux'))
+
+        if version == Version('17.1'):
+            run_env.prepend_path('PATH', join_path(ansys_prefix, 'tgrid/bin'))
+
+        run_env.prepend_path(
+            'PATH',
+            join_path(ansys_prefix, 'Framework/bin/Linux64'))
+        run_env.prepend_path(
+            'PATH',
+            join_path(ansys_prefix, 'icemcfd/linux64_amd/bin'))
+
+        if version < Version('20.2'):
+            run_env.prepend_path(
+                'LD_LIBRARY_PATH',
+                join_path(ansys_prefix, 'Framework/bin/Linux64'))
+            run_env.prepend_path(
+                'LD_LIBRARY_PATH',
+                join_path(
+                    ansys_prefix,
+                    'polyflow/polyflow{0}.0/lnamd64/libs'.format(version.up_to(2).dotted))) # noqa: E501
+            run_env.prepend_path(
+                'LD_LIBRARY_PATH',
+                join_path(ansys_prefix, 'Framework/bin/Linux64/Mesa'))

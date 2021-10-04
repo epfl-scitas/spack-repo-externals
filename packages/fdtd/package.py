@@ -33,6 +33,8 @@ class Fdtd(Package):
     licensed = True
     only_binary = True
 
+    version('2020-R2.4-2502')
+    version('2020-R2-2387')
     version('8.24.2387')
     version('8.20.1703')
     version('8.19.1416-1')
