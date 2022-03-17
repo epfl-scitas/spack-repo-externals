@@ -29,15 +29,16 @@ class Fdtd(Package):
     """3D/2D Maxwell's solver for nanophotonic devices."""
 
     homepage = "https://www.lumerical.com/products/fdtd/"
-    url      = "fakeurl.tar.gz"
+    url = "fakeurl.tar.gz"
     licensed = True
     only_binary = True
 
-    version('2021-R2.2-2806')
-    version('2020-R2.4-2502')
-    version('2020-R2-2387')
-    version('8.24.2387')
-    version('8.20.1703')
-    version('8.19.1416-1')
-    version('8.18.1365-1')
-    version('8.12.527')
+    version("2022-R1.1-2963")
+    version("2021-R2.2-2806")
+    version("2020-R2.4-2502")
+    version("2020-R2-2387")
+    version("8.24.2387")
+    version("8.20.1703")
+    version("8.19.1416-1")
+    version("8.18.1365-1")
+    version("8.12.527")
