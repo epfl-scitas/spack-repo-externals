@@ -36,7 +36,7 @@ class Castep(Package):
     licensed = True
     only_binary = True
 
-    version('11.11')
+    version('21.11')
 
     def install(self, spec, prefix):
         pass
