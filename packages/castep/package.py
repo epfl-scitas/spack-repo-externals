@@ -38,5 +38,9 @@ class Castep(Package):
 
     version('21.11')
 
+    depends_on('mpi')
+    depends_on('blas')
+    depends_on('fftw-api@3')
+
     def install(self, spec, prefix):
         pass
