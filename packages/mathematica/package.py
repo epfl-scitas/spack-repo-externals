@@ -44,6 +44,7 @@ class Mathematica(Package):
 
     version('9.0.1')
     version('11.1.1')
+    version('13.0')
 
     def install(self, spec, prefix):
         pass
