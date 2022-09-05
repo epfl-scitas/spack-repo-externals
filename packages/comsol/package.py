@@ -36,6 +36,7 @@ class Comsol(Package):
     licensed = True
     only_binary = True
 
+    version('6.0')
     version('5.6')
     version('5.5')
     version('5.4')
