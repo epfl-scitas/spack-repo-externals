@@ -37,6 +37,7 @@ class Gurobi(Package):
 
     homepage = "http://www.gurobi.com/index"
 
+    version('9.5.2', sha256='92e2d8972d3f0edec9c35eb5a7d5bd50390c5526a04aef50d771d2dd9d94a16a')
     version('9.1.0', sha256='92e2d8972d3f0edec9c35eb5a7d5bd50390c5526a04aef50d771d2dd9d94a16a')
     version('8.1.1', sha256='c030414603d88ad122246fe0e42a314fab428222d98e26768480f1f870b53484')
     version('7.5.2', sha256='d2e6e2eb591603d57e54827e906fe3d7e2e0e1a01f9155d33faf5a2a046d218e')
@@ -54,8 +55,16 @@ class Gurobi(Package):
     def install(self, spec, prefix):
         install_tree('linux64', join_path(prefix, 'linux64'))
 
+    @property
+    def global_license_file(self):
+        """Returns the path where a Spack-global license file should be stored.
+
+        All Intel software shares the same license, so we store it in a
+        common 'intel' directory."""
+        return os.path.join(self.global_license_dir, 'gurobi', 'gurobi.lic')
+
     def setup_environment(self, spack_env, run_env):
-        run_env.set('GRB_LICENSE_FILE', join_path(prefix, 'gurobi.lic'))
+        run_env.set('GRB_LICENSE_FILE', self.global_license_dir)
         run_env.set('GUROBI_HOME', join_path(prefix, 'linux64'))
         run_env.prepend_path('PATH', join_path(prefix, 'linux64', 'bin'))
         run_env.prepend_path('LD_LIBRARY_PATH', join_path(prefix, 'linux64',
