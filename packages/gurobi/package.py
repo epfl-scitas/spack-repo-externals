@@ -20,6 +20,7 @@
 # See the Spack documentation for more information on packaging.
 # ----------------------------------------------------------------------------
 from spack import *
+import os
 
 
 class Gurobi(Package):
