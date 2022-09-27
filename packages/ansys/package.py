@@ -51,6 +51,7 @@ class Ansys(Package):
     licensed = True
     only_binary = True
 
+    version('2022R2')
     version('2022R1')
     version('2020R2')
     version('19.2')
@@ -60,7 +61,9 @@ class Ansys(Package):
         pass
 
     def setup_environment(self, spack_env, run_env):
-        version_mapping = { '2020R2': '20.2' }
+        version_mapping = { '2020R2': '20.2',
+                            '2022R1': '22.1',
+                            '2022R2': '22.2'}
         version = self.spec.version
 
         if str(version) in version_mapping:
