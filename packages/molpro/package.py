@@ -46,11 +46,17 @@ class Molpro(Package):
             if self.version < Version('2019'):
                 options.append('--enable-mpp=%s' %
                                spec['mpi'].prefix.include)
-                if '%gcc':
+                if spec.satisfies('%gcc@:9.9'):
                     options.append('F90FLAGS=-ffree-line-length-none')
+                if spec.satisfies('%gcc@10:'):
+                    options.append('F90FLAGS=-ffree-line-length-none -fallow-argument-mismatch')
+
             else:
                 options.append('--without-ga')
         configure(*options)
+
+        if spec.satisfies('%gcc@10:'):
+            filter_file('FFLAGS=', 'FFLAGS=-fallow-argument-mismatch -fcheck=all ', 'CONFIG')
 
         # Molpro wants to use a variation of mpirun during the installation.
         # We need to change the LAUNCHER in CONFIG to something not MPI
@@ -61,6 +67,7 @@ class Molpro(Package):
         # Before the installation we change the launcher to srun (%x is the
         # Molpro executable itself) to conform to our cluster.
         filter_file(r'^LAUNCHER=.*', 'LAUNCHER=srun %x', 'CONFIG')
+
 
         make('install')
 
