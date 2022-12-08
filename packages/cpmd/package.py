@@ -1,92 +1,110 @@
-##############################################################################
-# Copyright (c) 2013-2016, Lawrence Livermore National Security, LLC.
-# Produced at the Lawrence Livermore National Laboratory.
+# Copyright 2013-2022 Lawrence Livermore National Security, LLC and other
+# Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
-# This file is part of Spack.
-# Created by Todd Gamblin, tgamblin@llnl.gov, All rights reserved.
-# LLNL-CODE-647188
-#
-# For details, see https://github.com/llnl/spack
-# Please also see the LICENSE file for our notice and the LGPL.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License (as
-# published by the Free Software Foundation) version 2.1, February 1999.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the IMPLIED WARRANTY OF
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the terms and
-# conditions of the GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-##############################################################################
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
 import os
+
 from spack import *
-from distutils.dir_util import copy_tree
 
 
-class Cpmd(Package):
+class Cpmd(MakefilePackage):
     """The CPMD code is a parallelized plane wave / pseudopotential
-       implementation of Density Functional Theory, particularly designed
-       for ab-initio molecular dynamics.
-    """
+    implementation of Density Functional Theory, particularly
+    designed for ab-initio molecular dynamics.
+    Move to new directory, download CPMD main archive and patch.to.XXXXs
+    manually, and run Spack"""
 
-    homepage = "http://www.cpmd.org/"
+    homepage = "https://www.cpmd.org/wordpress/"
     basedir = os.getcwd()
-    url = "file://{0}/cpmd-v4.1.tar.gz".format(basedir)
+    url = "file://{0}/cpmd-v4.3.tar.gz".format(basedir)
+    manual_download = True
 
-    version('v4.1', 'f70aedefa2e5f8a5f8d79afdd99d0895')
+    version('4.3', sha256='4f31ddf045f1ae5d6f25559d85ddbdab4d7a6200362849df833632976d095df4')
 
-    variant('openmp', default=False, description='Enables openMP support')
+    variant('openmp', description='Enables the use of OpenMP instructions',
+            default=False)
+    variant('mpi', description='Build with MPI support', default=False)
 
-    depends_on('mpi')
-    depends_on('blas')
     depends_on('lapack')
-    depends_on('fftw', when='~openmp')
-    depends_on('fftw+openmp', when='+openmp')
+    depends_on('mpi', when='+mpi')
+
+    conflicts('^openblas threads=none', when='+openmp')
+    conflicts('^openblas threads=pthreads', when='+openmp')
+
+    patch('file://{0}/patch.to.4612'.format(basedir), sha256='3b7d91e04c40418ad958069234ec7253fbf6c4be361a1d5cfd804774eeb44915', level=0, when='@4.3')
+    patch('file://{0}/patch.to.4615'.format(basedir), sha256='5ec5790fb6ca64632bcc1b0f5b8f3423c54455766a0979ff4136624bbe8d49eb', level=0, when='@4.3')
+    patch('file://{0}/patch.to.4616'.format(basedir), sha256='ac0bc215c4259f55da4dc59803fe636f797e241f8a01974e05730c9778ad44c4', level=0, when='@4.3')
+    patch('file://{0}/patch.to.4621'.format(basedir), sha256='2d2bc7e37246032fc354f51da7dbdb5a219dd228867399931b0e94da1265d5ca', level=0, when='@4.3')
+    patch('file://{0}/patch.to.4624'.format(basedir), sha256='0a19687528264bf91c9f50ffdc0b920a8511eecf5259b667c8c29350f9dabc53', level=0, when='@4.3')
+    patch('file://{0}/patch.to.4650'.format(basedir), sha256='70e752db0b454db39ebf703944f35b584cf5bafc9addf88d372c75d04ceadbf2', level=0, when='@4.3')
+
+    def edit(self, spec, prefix):
+        # patch configure file
+        cbase = 'LINUX-GFORTRAN'
+        cp = FileFilter(join_path('configure', cbase))
+        # Compilers
+        if spec.satisfies('+mpi'):
+            fc = spec["mpi"].mpifc
+            cc = spec["mpi"].mpicc
+        else:
+            fc = spack_fc
+            cc = spack_cc
+
+        cp.filter('FC=.+', "FC='{0}'".format(fc))
+        cp.filter('CC=.+', "CC='{0}'".format(cc))
+        cp.filter('LD=.+', "LD='{0}'".format(fc))
+
+        # MPI flag
+        if spec.satisfies('+mpi'):
+            cp.filter('-D__Linux', '-D__Linux -D__PARALLEL')
+
+        # OpenMP flag
+        if spec.satisfies('+openmp'):
+            cp.filter('-fopenmp', self.compiler.openmp_flag)
+
+        # lapack
+        cp.filter(
+            'LIBS=.+',
+            "LIBS='{0}'".format(spec['lapack'].libs.ld_flags)
+        )
+
+        # LFLAGS
+        cp.filter("'-static '", '')
+
+        if spec.satisfies('%gcc@10:'):
+            cp.filter("FFLAGS='", "FFLAGS='-fallow-argument-mismatch ")
+
+        # Compiler specific
+        if spec.satisfies('%fj'):
+            cp.filter('-ffixed-form', '-Fixed')
+            cp.filter('-ffree-line-length-none', '')
+            cp.filter('-falign-commons', '-Kalign_commons')
+
+        # create Makefile
+        bash = which('bash')
+        if spec.satisfies('+openmp'):
+            bash('./configure.sh', '-omp', cbase)
+        else:
+            bash('./configure.sh', cbase)
 
     def install(self, spec, prefix):
-        bash = which('bash')
+        install_tree('.', prefix)
 
-        if '%intel' in self.spec:
-            architecture = 'LINUX-X86_64-INTEL-MPI'
-            filter_file('mpicc', spec['mpi'].mpicc, 'configure/%s'
-                        % architecture)
-            filter_file('mpif90', spec['mpi'].mpifc, 'configure/%s'
-                        % architecture)
-            filter_file('(CPP=)(\')(.+)(\')', r'\1\2\%s\4' %
-                        'fpp -P', 'configure/%s' % architecture)
-
-        if '%gcc' in self.spec:
-            architecture = 'LINUX-I686-FEDORA-MPI-FFTW'
-            # by default CPMD use FFTW when compiled with gnu
-            # It's better FFTW3
-            filter_file('(CPPFLAGS=)(\')(.+)(\')', r'\1\2\3%s\4' %
-                        ' -D__HAS_FFT_FFTW3', 'configure/%s' % architecture)
-            # the option -ffree-line-length-none is necessary to avoid
-            # errors occurring when a line is too long
-            filter_file('(FFLAGS=)(\')(.+)(\')', r'\1\2\3%s\4' %
-                        ' -ffree-line-length-none -fallow-argument-mismatch',
-                        'configure/%s' % architecture)
-
-            libs = ''
-            libs += str(spec['blas'].libs)
-            if '+openmp' in spec:
-                string = spec['fftw'].prefix.lib
-                fftwlib = ' -L%s' % string + ' -lfftw3_omp -lfftw3'
-            else:
-                string = spec['fftw'].prefix.lib
-                fftwlib = ' -L%s' % string + ' -lfftw3'
-            libs += fftwlib
-            filter_file('(LIBS=)(\')(.+)(\')', r'\1\2%s\4' % libs,
-                        'configure/%s' % architecture)
-
-        if '+openmp' in spec:
-            bash('-c', 'export omp=1;./configure.sh %s' % architecture)
+    def test(self):
+        test_dir = self.test_suite.current_test_data_dir
+        test_file = join_path(test_dir, '1-h2o-pbc-geoopt.inp')
+        opts = []
+        if self.spec.satisfies('+mpi'):
+            exe_name = self.spec['mpi'].prefix.bin.mpirun
+            opts.extend(['-n', '2'])
+            opts.append(join_path(self.prefix.bin, 'cpmd.x'))
         else:
-            bash('-c', './configure.sh %s' % architecture)
-
-        make(parallel=False)
-        copy_tree('bin', self.prefix.bin)
+            exe_name = 'cpmd.x'
+        opts.append(test_file)
+        opts.append(test_dir)
+        expected = ['2       1        H        O              1.84444     0.97604',
+                    '3       1        H        O              1.84444     0.97604',
+                    '2   1   3         H     O     H              103.8663'
+                    ]
+        self.run_test(exe_name, options=opts, expected=expected)
