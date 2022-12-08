@@ -22,6 +22,7 @@
 # License along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##############################################################################
+import os
 from spack import *
 from distutils.dir_util import copy_tree
 
@@ -33,7 +34,8 @@ class Cpmd(Package):
     """
 
     homepage = "http://www.cpmd.org/"
-    url      = "cpmd-v4.1.tar.gz"
+    basedir = os.getcwd()
+    url = "file://{0}/cpmd-v4.1.tar.gz".format(basedir)
 
     version('v4.1', 'f70aedefa2e5f8a5f8d79afdd99d0895')
 
@@ -57,7 +59,7 @@ class Cpmd(Package):
             filter_file('(CPP=)(\')(.+)(\')', r'\1\2\%s\4' %
                         'fpp -P', 'configure/%s' % architecture)
 
-        elif '%gcc' in self.spec:
+        if '%gcc' in self.spec:
             architecture = 'LINUX-I686-FEDORA-MPI-FFTW'
             # by default CPMD use FFTW when compiled with gnu
             # It's better FFTW3
@@ -66,8 +68,8 @@ class Cpmd(Package):
             # the option -ffree-line-length-none is necessary to avoid
             # errors occurring when a line is too long
             filter_file('(FFLAGS=)(\')(.+)(\')', r'\1\2\3%s\4' %
-                        ' -ffree-line-length-none', 'configure/%s' %
-                        architecture)
+                        ' -ffree-line-length-none -fallow-argument-mismatch',
+                        'configure/%s' % architecture)
 
             libs = ''
             libs += str(spec['blas'].libs)
