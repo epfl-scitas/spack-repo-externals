@@ -37,7 +37,7 @@ class Cpmd(MakefilePackage):
     patch('file://{0}/patch.to.4616'.format(basedir), sha256='ac0bc215c4259f55da4dc59803fe636f797e241f8a01974e05730c9778ad44c4', level=0, when='@4.3')
     patch('file://{0}/patch.to.4621'.format(basedir), sha256='2d2bc7e37246032fc354f51da7dbdb5a219dd228867399931b0e94da1265d5ca', level=0, when='@4.3')
     patch('file://{0}/patch.to.4624'.format(basedir), sha256='0a19687528264bf91c9f50ffdc0b920a8511eecf5259b667c8c29350f9dabc53', level=0, when='@4.3')
-    patch('file://{0}/patch.to.4650'.format(basedir), sha256='70e752db0b454db39ebf703944f35b584cf5bafc9addf88d372c75d04ceadbf2', level=0, when='@4.3')
+#    patch('file://{0}/patch.to.4650'.format(basedir), sha256='70e752db0b454db39ebf703944f35b584cf5bafc9addf88d372c75d04ceadbf2', level=0, when='@4.3')
 
     def edit(self, spec, prefix):
         # patch configure file
