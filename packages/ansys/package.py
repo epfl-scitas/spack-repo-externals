@@ -60,10 +60,10 @@ class Ansys(Package):
     def install(self, spec, prefix):
         pass
 
-    def setup_environment(self, spack_env, run_env):
-        version_mapping = { '2020R2': '20.2',
-                            '2022R1': '22.1',
-                            '2022R2': '22.2'}
+    def setup_run_environment(self, run_env):
+        version_mapping = {'2020R2': '20.2',
+                           '2022R1': '22.1',
+                           '2022R2': '22.2'}
         version = self.spec.version
 
         if str(version) in version_mapping:

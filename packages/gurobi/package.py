@@ -64,7 +64,7 @@ class Gurobi(Package):
         common 'intel' directory."""
         return os.path.join(self.global_license_dir, 'gurobi', 'gurobi.lic')
 
-    def setup_environment(self, spack_env, run_env):
+    def setup_run_environment(self, run_env):
         run_env.set('GRB_LICENSE_FILE', self.global_license_file)
         run_env.set('GUROBI_HOME', join_path(prefix, 'linux64'))
         run_env.prepend_path('PATH', join_path(prefix, 'linux64', 'bin'))

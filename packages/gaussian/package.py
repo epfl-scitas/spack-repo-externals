@@ -34,7 +34,8 @@ class Gaussian(Package):
     """
 
     homepage = "http://www.gaussian.com"
-    url = 'fakeurl.tar.gz'
+    url = 'file://fakeurl.tar.gz'
+    manual_download = True
 
     version('g16-C.01')
     version('g16-A.03')
@@ -42,8 +43,7 @@ class Gaussian(Package):
     def install(self, spec, prefix):
         distutils.dir_util.copy_tree(".", prefix + '/g09')
 
-    def setup_environment(self, spack_env, run_env):
-
+    def setup_run_environment(self, run_env):
         prefix = self.prefix
 
         vector_instructions = ''
@@ -66,7 +66,6 @@ class Gaussian(Package):
         ]
 
         run_env.set('GAUSS_EXEDIR', ':'.join(exec_dirs))
-
         run_env.set('GAUSS_LEXEDIR', join_path(g16_dir, 'linda-exe'))
         run_env.set('GAUSS_ARCHDIR', join_path(g16_dir, 'arch'))
         run_env.set('GAUSS_BSDDIR', join_path(g16_dir, 'bsd'))

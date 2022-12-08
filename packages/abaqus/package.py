@@ -19,6 +19,5 @@ class Abaqus(Package):
         pass
 
 
-    def setup_environment(self, spack_env, run_env):
-
+    def setup_run_environment(self, run_env):
         run_env.prepend_path('PATH', '/ssoft/spack/external/abaqus/6.14-1/code/bin')

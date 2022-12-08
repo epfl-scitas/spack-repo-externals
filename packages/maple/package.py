@@ -60,13 +60,13 @@ Maple is an interpreted language."""
     license_required = True
     license_comment = '#'
     license_files = ['license/license.dat']
-    license_vars     = ['LM_LICENSE_FILE']
+    license_vars = ['LM_LICENSE_FILE']
     license_url = "https://www.maplesoft.com/products/Maple/"
 
     def install(self, spec, prefix):
         pass
 
-    def setup_environment(self, spack_env, run_env):
+    def setup_run_environment(self, run_env):
         run_env.prepend_path('PATH', '/ssoft/spack/external/Maple/2017/bin')
         run_env.prepend_path('LD_LIBRARY_PATH',
                              '/ssoft/spack/external/Maple/2017/lib')

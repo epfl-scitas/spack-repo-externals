@@ -55,7 +55,7 @@ class Crystal17(Package):
 
         install_tree('bin', spec.prefix.bin)
 
-    def setup_environment(self, spack_env, run_env):
+    def setup_run_environment(self, run_env):
         run_env.set('CRY17_ROOT', self.prefix)
         run_env.set('CRY17_EXEDIR', self.prefix.bin)
         run_env.set('CRY17_UTILS', self.prefix.bin)

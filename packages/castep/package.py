@@ -42,7 +42,7 @@ class Castep(MakefilePackage):
     depends_on('intel-mkl')
     depends_on('fftw-api@3')
 
-    def setup_environment(self, spack_env, run_env):
+    def setup_run_environment(self, run_env):
         run_env.prepend_path('PATH', self.prefix)
 
     def build(self, spec, prefix):

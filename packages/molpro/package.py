@@ -71,7 +71,7 @@ class Molpro(Package):
 
         make('install')
 
-    def setup_environment(self, spack_env, run_env):
+    def setup_run_environment(self, run_env):
         if self.version < Version('2019'):
             dir_base_name='molprop'
         else:

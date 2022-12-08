@@ -38,7 +38,7 @@ class Adf(Package):
     def install(self, spec, prefix):
         pass
 
-    def setup_environment(self, spack_env, run_env):
+    def setup_run_environment(self, run_env):
         adf_base = '/ssoft/spack/external/adf/adf2017.111'
         
         run_env.set('ADFBIN', join_path(adf_base, 'bin'))
