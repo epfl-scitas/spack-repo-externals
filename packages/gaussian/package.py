@@ -22,7 +22,7 @@
 # License along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##############################################################################
-
+import os
 from spack import *
 
 import distutils.dir_util
@@ -34,7 +34,8 @@ class Gaussian(Package):
     """
 
     homepage = "http://www.gaussian.com"
-    url = 'file://fakeurl.tar.gz'
+    basedir = os.getcwd()
+    url = "file://{0}/gaussian-g16-C.01.tar.gz".format(basedir)
     manual_download = True
 
     version('g16-C.01')

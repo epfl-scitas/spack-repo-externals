@@ -7,7 +7,7 @@ class Totalview(Package):
     """
 
     homepage = "http://www.roguewave.com/products-services/totalview"
-    url = 'fakeurl.tar.gz'
+    url = 'file://fakeurl.tar.gz'
     licensed = True
     only_binary = True
 

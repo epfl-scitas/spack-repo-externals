@@ -52,7 +52,7 @@ in numerical arithmetic and in combinatorics.
 Maple is an interpreted language."""
 
     homepage = "https://www.maplesoft.com/products/Maple/"
-    url      = "fakeurl.tar.gz"
+    url = "file://fakeurl.tar.gz"
 
     version('2017')
 

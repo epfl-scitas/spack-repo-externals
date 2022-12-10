@@ -29,7 +29,7 @@ class Adf(Package):
     """ADF is a DFT software for modelling chemistry."""
 
     homepage = "http://www.scm.com"
-    url      = "fake_url.tar.gz"
+    url      = "file://fake_url.tar.gz"
     only_binary = True
     licensed = True
 

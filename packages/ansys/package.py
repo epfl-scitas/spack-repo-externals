@@ -47,7 +47,7 @@ class Ansys(Package):
     """
 
     homepage = "http://www.ansys.com"
-    url = 'fakeurl.tar.gz'
+    url = 'file://fakeurl.tar.gz'
     licensed = True
     only_binary = True
 
