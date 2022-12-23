@@ -25,9 +25,11 @@ class Cpmd(MakefilePackage):
     variant('openmp', description='Enables the use of OpenMP instructions',
             default=False)
     variant('mpi', description='Build with MPI support', default=False)
+    variant('fftw', description='Build with external FFTW support', default=False)
 
     depends_on('lapack')
     depends_on('mpi', when='+mpi')
+    depends_on('fftw-api@3', when='+fftw')
 
     conflicts('^openblas threads=none', when='+openmp')
     conflicts('^openblas threads=pthreads', when='+openmp')
@@ -40,11 +42,21 @@ class Cpmd(MakefilePackage):
 #    patch('file://{0}/patch.to.4650'.format(basedir), sha256='70e752db0b454db39ebf703944f35b584cf5bafc9addf88d372c75d04ceadbf2', level=0, when='@4.3')
 
     def edit(self, spec, prefix):
+
         # patch configure file
-        cbase = 'LINUX-GFORTRAN'
+        if spec.satisfies('%gcc'):
+            cbase = 'LINUX-GFORTRAN'
+        elif spec.satisfies('%intel'):
+            cbase = 'LINUX-INTEL'
         cp = FileFilter(join_path('configure', cbase))
         # Compilers
         if spec.satisfies('+mpi'):
+            ## there's a bug and mpifc and mpicc are chosen
+            ## resulting in the wrong compilers being chosen
+            #if spec.satisfies('^intel-oneapi-mpi'):
+            #    fc = 'mpiifort'
+            #    cc = 'mpiicc'
+            #else:
             fc = spec["mpi"].mpifc
             cc = spec["mpi"].mpicc
         else:
@@ -57,17 +69,28 @@ class Cpmd(MakefilePackage):
 
         # MPI flag
         if spec.satisfies('+mpi'):
-            cp.filter('-D__Linux', '-D__Linux -D__PARALLEL')
+            cp.filter('-D__Linux', '-D__Linux -D__PARALLEL -D__HPC -D__HAS_SIZEOF')
 
         # OpenMP flag
         if spec.satisfies('+openmp'):
             cp.filter('-fopenmp', self.compiler.openmp_flag)
 
         # lapack
-        cp.filter(
-            'LIBS=.+',
-            "LIBS='{0}'".format(spec['lapack'].libs.ld_flags)
-        )
+        if not spec.satisfies('%intel'):
+            cp.filter(
+                'LIBS=.+',
+                "LIBS='{0}'".format(spec['lapack'].libs.ld_flags)
+            )
+
+        # External FFTW
+        if spec.satisfies('+fftw'):
+            cp.filter('-D__HAS_FFT_DEFAULT', '-D__HAS_FFT_FFTW3')
+            if not spec.satisfies('^mkl'):
+                cp.filter("FFLAGS='", "FFLAGS='-I{0}".format(spec['fftw'].include))
+                cp.filter(
+                    "LIBS='",
+                    "LIBS='{0} ".format(spec['fftw'].libs.ld_flags)
+                )
 
         # LFLAGS
         cp.filter("'-static '", '')
@@ -80,6 +103,24 @@ class Cpmd(MakefilePackage):
             cp.filter('-ffixed-form', '-Fixed')
             cp.filter('-ffree-line-length-none', '')
             cp.filter('-falign-commons', '-Kalign_commons')
+
+        if spec.satisfies('%intel'):
+            cp.filter('CPP=', 'CPP=/lib/cpp -P -traditional')
+            #cp.filter("CPPFLAGS='-D__Linux", "CPPFLAGS='-D__Linux -DLINUX_IFC")
+            cp.filter("-D__HAS_FFT_DEFAULT", "-D__HAS_FFT_FFTW3")
+            cp.filter('-O3 -pc64', '-O2 -m64 -unroll-aggressive')
+            cp.filter("LFLAGS='-static-intel '", "LFLAGS=")
+
+            # The intel configure file assumes intel-mkl
+            # I'm trying to generalize it
+            if not spec.satisfies('^mkl'):
+                cp.filter(
+                'LIBS=.+',
+                "LIBS='{0}'".format(spec['lapack'].libs.ld_flags)
+            )
+            # Due to deprecation warning (intel-oneapi-*)
+            elif spec.satisfies('^intel-oneapi-mkl'):
+                cp.filter('-mkl=', '-qmkl=')
 
         # create Makefile
         bash = which('bash')
