@@ -12,12 +12,15 @@ class Abaqus(Package):
     licensed = True
     only_binary = True
 
-
+    version('2019')
     version('6.14-1')
 
     def install(self, spec, prefix):
         pass
 
-
     def setup_run_environment(self, run_env):
-        run_env.prepend_path('PATH', '/ssoft/spack/external/abaqus/6.14-1/code/bin')
+        version = self.spec.version
+        if version >= Version('2019'):
+            run_env.prepend_path('PATH', self.prefix)
+        else:
+            run_env.prepend_path('PATH', join_patch(self.prefix, 'code/bin'))
