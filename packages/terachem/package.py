@@ -20,8 +20,7 @@ class Terachem(Package):
         pass
 
     def setup_run_environment(self, run_env):
-        tera_base = '/ssoft/spack/external/terachem'
-        tera_root = join_path(tera_base, str(self.spec.version), 'TeraChem')
+        tera_root = join_path(self.prefix, 'TeraChem')
 
         run_env.set('TeraChem', tera_root)
         run_env.set('NBOEXE', join_path(tera_root, 'bin', 'nbo6.i4.exe'))
