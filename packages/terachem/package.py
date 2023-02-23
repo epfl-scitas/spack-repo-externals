@@ -13,8 +13,6 @@ class Terachem(Package):
     homepage = "https://www.petachem.com"
     url      = "file://fake_url.tar.gz"
     only_binary = True
-    licensed = True
-
 
     version('1.96H-beta')
 
