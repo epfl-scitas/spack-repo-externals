@@ -34,7 +34,8 @@ class Adf(Package):
     licensed = True
 
     version('2017.111')
-
+    depends_on('mpi')
+    
     def install(self, spec, prefix):
         pass
 

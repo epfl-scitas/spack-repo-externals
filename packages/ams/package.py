@@ -14,6 +14,7 @@ class Ams(Package):
     licensed = True
 
     version('2022.103')
+    depends_on('mpi')
 
     def install(self, spec, prefix):
         pass
