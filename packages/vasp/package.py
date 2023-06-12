@@ -85,14 +85,16 @@ class Vasp(MakefilePackage):
                         make_include = join_path("arch", base_name + "gnu_ompi_mkl_omp")
                         filter_file(' -fopenmp', '', make_include)
                         filter_file('-lmkl_gnu_thread', '-lmkl_sequential', make_include)
-                        filter_file('^LLIBS_MKL.*SCALAPACK_ROOT.*', '#LLIBS_MKL', make_include)
-                        if spec.satisfies('+scalapack'):
-                            filter_file("^LLIBS_MKL.*", "LLIBS_MKL = {0} {1}".format(
-                                        spec["scalapack"].libs.ld_flags,
-                                        spec["blas"].libs.ld_flags), make_include)
-                        else:
-                            filter_file("^LLIBS_MKL.*", "LLIBS_MKL = {}".format(
-                                        spec["blas"].libs.ld_flags), make_include)
+                    filter_file('^LLIBS_MKL.*SCALAPACK_ROOT.*', '#LLIBS_MKL', make_include)
+                    # This doesn't work, since the choice of libraries is broken
+                    # https://github.com/spack/spack/issues/37459
+                    #if spec.satisfies('+scalapack'):
+                    #    filter_file("^LLIBS_MKL.*", "LLIBS_MKL = {0} {1}".format(
+                    #                spec["scalapack"].libs.ld_flags,
+                    #                spec["blas"].libs.ld_flags), make_include)
+                    #else:
+                    #    filter_file("^LLIBS_MKL.*", "LLIBS_MKL = {}".format(
+                    #                spec["blas"].libs.ld_flags), make_include)
                 elif spec.satisfies("+openmp"):
                     make_include = join_path("arch", base_name + "gnu_omp")
                 else:
