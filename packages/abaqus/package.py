@@ -12,6 +12,7 @@ class Abaqus(Package):
     licensed = True
     only_binary = True
 
+    version('2023')
     version('2019')
     version('6.14-1')
 
