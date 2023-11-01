@@ -20,6 +20,7 @@ class Vasp(MakefilePackage):
     url = "file://{0}/vasp.5.4.4.pl2.tgz".format(os.getcwd())
     manual_download = True
 
+    version("6.4.1", sha256="4747e7403ecd114c56ada213cf8745e177e874aa4553897dcc21e9d43e67140c")
     version("6.3.2", sha256="f7595221b0f9236a324ea8afe170637a578cdd5a837cc7679e7f7812f6edf25a")
     version("6.2.1", sha256="d25e2f477d83cb20fce6a2a56dcee5dccf86d045dd7f76d3ae19af8343156a13")
     version("6.1.1", sha256="e37a4dfad09d3ad0410833bcd55af6b599179a085299026992c2d8e319bf6927")
@@ -60,9 +61,9 @@ class Vasp(MakefilePackage):
         "%gcc@:8", msg="GFortran before 9.x does not support all features needed to build VASP"
     )
     conflicts("+vaspsol", when="+cuda", msg="+vaspsol only available for CPU")
-    conflicts("+openmp", when="@:6.1", msg="openmp support started from 6.2")
+    conflicts("+openmp", when="@:6.1", msg="OpenMP support was added on 6.2")
     conflicts("+cuda", when="@6.3:", msg="Previous CUDA support ended with 6.2. Use %nvhpc instead")
-    conflicts("+hdf5", when="@:6.1", msg="HDF5 support was started from 6.2.0")
+    conflicts("+hdf5", when="@:6.1", msg="HDF5 support was added on 6.2")
 
     parallel = False
 
@@ -85,16 +86,14 @@ class Vasp(MakefilePackage):
                         make_include = join_path("arch", base_name + "gnu_ompi_mkl_omp")
                         filter_file(' -fopenmp', '', make_include)
                         filter_file('-lmkl_gnu_thread', '-lmkl_sequential', make_include)
-                    filter_file('^LLIBS_MKL.*SCALAPACK_ROOT.*', '#LLIBS_MKL', make_include)
-                    # This doesn't work, since the choice of libraries is broken
-                    # https://github.com/spack/spack/issues/37459
-                    #if spec.satisfies('+scalapack'):
-                    #    filter_file("^LLIBS_MKL.*", "LLIBS_MKL = {0} {1}".format(
-                    #                spec["scalapack"].libs.ld_flags,
-                    #                spec["blas"].libs.ld_flags), make_include)
-                    #else:
-                    #    filter_file("^LLIBS_MKL.*", "LLIBS_MKL = {}".format(
-                    #                spec["blas"].libs.ld_flags), make_include)
+                        filter_file('^LLIBS_MKL.*SCALAPACK_ROOT.*', '#LLIBS_MKL', make_include)
+                    # if spec.satisfies('+scalapack'):
+                    #     filter_file("^LLIBS_MKL.*", "LLIBS_MKL = {0} {1}".format(
+                    #                 spec["scalapack"].libs.ld_flags,
+                    #                 spec["blas"].libs.ld_flags), make_include)
+                    # else:
+                    #     filter_file("^LLIBS_MKL.*", "LLIBS_MKL = {}".format(
+                    #                 spec["blas"].libs.ld_flags), make_include)
                 elif spec.satisfies("+openmp"):
                     make_include = join_path("arch", base_name + "gnu_omp")
                 else:
@@ -168,15 +167,33 @@ class Vasp(MakefilePackage):
         filter_file("^FC_LIB\s+= \S+", "FC_LIB = {0}".format(spack_fc), make_include)
         filter_file("^CC_LIB\s+= \S+", "CC_LIB = {0}".format(spack_cc), make_include)
         filter_file("^CXX_PARS\s+= \S+", "CXX_PARS = {0}".format(spack_cxx), make_include)
-
+ 
         if spec.satisfies("+hdf5"):
-            filter_file("^#LLIBS\s+\+= -L\$\(HDF5_ROOT\)", "LLIBS += -L$(HDF5_ROOT)", make_include)
-            filter_file("^#INCS\s+\+= -I\$\(HDF5_ROOT\)", "INCS += -I$(HDF5_ROOT)", make_include)
+            if spec.satisfies("@6.3:"):
+                filter_file("^#LLIBS\s+\+= -L\$\(HDF5_ROOT\)", "LLIBS += -L$(HDF5_ROOT)", make_include)
+                filter_file("^#INCS\s+\+= -I\$\(HDF5_ROOT\)", "INCS += -I$(HDF5_ROOT)", make_include)
+            # VASP 6.2 supports HDF5, but the makefile.includes proposed do not include it
+            # Avoiding a patch to make it as generic as possible
+            else:
+                filter_file("^LLIBS\s+=", "LLIBS = -L{} ".format(spec["hdf5"].libs.ld_flags), make_include)
+                if spec.satisfies("^mkl"):
+                    filter_file("^INCS\s+=-I\$\(MKL", "INCS = -I$(HDF5_ROOT)/include -I$(MKL", make_include)
+                else:
+                    filter_file("^INCS\s+= -I\$\(FFTW", "INCS = -I$(HDF5_ROOT)/include -I$(FFTW", make_include)
 
         if spec.satisfies("+shmem"):
             # From here:
             # https://www.vasp.at/wiki/index.php/Shared_memory
             filter_file("^OBJECTS_LIB = linpack_double.o", "OBJECTS_LIB = linpack_double.o getshmem.o", make_include)
+
+        # Recommended addition for non-MKL OpenMP builds
+        if spec.satisfies("@6.2:") and spec.satisfies('+openmp') and not spec.satisfies('^mkl'):
+            filter_file("^#CPP_OPTIONS\+= -Dsysv", "CPP_OPTIONS+= -Dsysv", make_include)
+            filter_file("^#FCL\s+\+= fftlib.o", "FCL += fftlib.o", make_include)
+            filter_file("^#CXX_FFTLIB", "CXX_FFTLIB", make_include)
+            filter_file("^#INCS_FFTLIB", "INCS_FFTLIB", make_include)
+            filter_file("^#LIBS\s+\+= fftlib", "LIBS += fftlib", make_include)
+            filter_file("^#LLIBS\s+\+= -ldl", "LLIBS += -ldl", make_include)
 
         # This bunch of 'filter_file()' is to make these options settable
         # as environment variables
@@ -222,12 +239,14 @@ class Vasp(MakefilePackage):
         if spec.satisfies("+shmem"):
             cpp_options.append("-Duse_shmem")
 
-        if "%nvhpc" in self.spec:
-            cpp_options.extend(['-DHOST=\\"LinuxPGI\\"', "-DPGI16", "-Dqd_emulate"])
-        elif "%aocc" in self.spec:
+        if spec.satisfies("%nvhpc"):
+            if spec.satisfies("@6.3:"):
+                cpp_options.extend('-DHOST=\\"LinuxNV\\"')
+            else:
+                cpp_options.extend('-DHOST=\\"LinuxPGI\\"')
+            cpp_options.extend(["-Dqd_emulate", "-Dfock_dblbuf", "-D_OPENACC", "-DUSENCCL", "-DUSENCCLP2P"])
+        elif spec.satisfies("%aocc"):
             cpp_options.extend(['-DHOST=\\"LinuxGNU\\"', "-Dfock_dblbuf"])
-            if "+openmp" in self.spec:
-                cpp_options.extend(["-D_OPENMP"])
         elif spec.satisfies("%intel"):
             cpp_options.append('-DHOST=\\"LinuxIFC\\"')
         else:
