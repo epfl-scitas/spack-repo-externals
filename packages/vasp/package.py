@@ -39,6 +39,7 @@ class Vasp(MakefilePackage):
     variant("hdf5", default=False, description="Enables build with HDF5")
     variant("scalapack", default=False, description="Enables build with SCALAPACK")
     variant("cuda", default=False, description="Enables running on Nvidia GPUs")
+    variant("wannier90", default=False, description="Enables Wannier90 support")
 
     variant(
         "vaspsol",
@@ -56,6 +57,9 @@ class Vasp(MakefilePackage):
     depends_on("cuda", when="+cuda")
     depends_on("qd", when="%nvhpc")
     depends_on("hdf5", when="+hdf5")
+    depends_on("wannier90", when="+wannier90")
+    depends_on("wannier90@:2", when="@6.1 +wannier90")
+    depends_on("wannier90@2.0:", when="@6.2: +wannier90")
 
     conflicts(
         "%gcc@:8", msg="GFortran before 9.x does not support all features needed to build VASP"
@@ -64,6 +68,8 @@ class Vasp(MakefilePackage):
     conflicts("+openmp", when="@:6.1", msg="OpenMP support was added on 6.2")
     conflicts("+cuda", when="@6.3:", msg="Previous CUDA support ended with 6.2. Use %nvhpc instead")
     conflicts("+hdf5", when="@:6.1", msg="HDF5 support was added on 6.2")
+    conflicts("+wannier90", when="@:6.0", msg="Wannier90 support was added on 6.1")
+    conflicts("wannier90@3.0:", when="@:6.1", msg="Vasp 6.1 only supports up to wannier90@2")
 
     parallel = False
 
@@ -170,21 +176,27 @@ class Vasp(MakefilePackage):
  
         if spec.satisfies("+hdf5"):
             if spec.satisfies("@6.3:"):
-                filter_file("^#LLIBS\s+\+= -L\$\(HDF5_ROOT\)", "LLIBS += -L$(HDF5_ROOT)", make_include)
-                filter_file("^#INCS\s+\+= -I\$\(HDF5_ROOT\)", "INCS += -I$(HDF5_ROOT)", make_include)
+                filter_file("^#LLIBS\s+\+= -L\$\(HDF5_ROOT\)", "LLIBS += -L{}".format(spec["hdf5"].prefix), make_include)
+                filter_file("^#INCS\s+\+= -I\$\(HDF5_ROOT\)", "INCS += -I{}".format(spec["hdf5"].prefix), make_include)
             # VASP 6.2 supports HDF5, but the makefile.includes proposed do not include it
             # Avoiding a patch to make it as generic as possible
             else:
-                filter_file("^LLIBS\s+=", "LLIBS = -L{} ".format(spec["hdf5"].libs.ld_flags), make_include)
+                filter_file("^LLIBS\s+=", "LLIBS = -L{}/lib -lhdf5_fortran ".format(spec["hdf5"].prefix), make_include)
                 if spec.satisfies("^mkl"):
-                    filter_file("^INCS\s+=-I\$\(MKL", "INCS = -I$(HDF5_ROOT)/include -I$(MKL", make_include)
+                    filter_file("^INCS\s+=-I\$\(MKL", "INCS = -I{}/include -I$(MKL".format(spec["hdf5"].prefix), make_include)
                 else:
-                    filter_file("^INCS\s+= -I\$\(FFTW", "INCS = -I$(HDF5_ROOT)/include -I$(FFTW", make_include)
+                    filter_file("^INCS\s+= -I\$\(FFTW", "INCS = -I{}/include -I$(FFTW".format(spec["hdf5"].prefix), make_include)
 
         if spec.satisfies("+shmem"):
             # From here:
             # https://www.vasp.at/wiki/index.php/Shared_memory
             filter_file("^OBJECTS_LIB = linpack_double.o", "OBJECTS_LIB = linpack_double.o getshmem.o", make_include)
+
+        if spec.satisfies("+wannier90"):
+            if spec.satisfies("@6.3:"):
+                filter_file("^#LLIBS\s+\+= -L\$\(WANNIER90_ROOT.*", "LLIBS += -L{}/lib -lwannier".format(spec["wannier90"].prefix), make_include)
+            else:
+                filter_file("^LLIBS\s+=", "LLIBS = -L{}/lib -lwannier".format(spec["wannier90"].prefix), make_include)
 
         # Recommended addition for non-MKL OpenMP builds
         if spec.satisfies("@6.2:") and spec.satisfies('+openmp') and not spec.satisfies('^mkl'):
@@ -305,7 +317,12 @@ class Vasp(MakefilePackage):
 
         if spec.satisfies("+hdf5"):
             cpp_options.append("-DVASP_HDF5")
-            spack_env.set("HDF5_ROOT", spec["hdf5"].prefix)
+
+        if spec.satisfies("+wannier90"):
+            if spec.satisfies("@6.2:"):
+                cpp_options.append("-DVASP2WANNIER90")
+            else:
+                cpp_options.append("-DVASP2WANNIER90v2")
 
         if spec.satisfies("+vaspsol"):
             cpp_options.append("-Dsol_compat")
